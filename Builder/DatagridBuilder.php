@@ -12,6 +12,7 @@
 
 namespace Sonata\DoctrineMongoDBAdminBundle\Builder;
 
+use Doctrine\ODM\MongoDB\Mapping\ClassMetadataInfo;
 use Sonata\DoctrineMongoDBAdminBundle\Datagrid\Pager;
 
 use Sonata\AdminBundle\Admin\FieldDescriptionInterface;
@@ -21,6 +22,7 @@ use Sonata\AdminBundle\Datagrid\Datagrid;
 use Sonata\AdminBundle\Builder\DatagridBuilderInterface;
 use Sonata\AdminBundle\Guesser\TypeGuesserInterface;
 use Sonata\AdminBundle\Filter\FilterFactoryInterface;
+
 use Symfony\Component\Form\FormFactory;
 
 class DatagridBuilder implements DatagridBuilderInterface
@@ -85,6 +87,10 @@ class DatagridBuilder implements DatagridBuilderInterface
 
         $fieldDescription->setOption('code', $fieldDescription->getOption('code', $fieldDescription->getName()));
         $fieldDescription->setOption('name', $fieldDescription->getOption('name', $fieldDescription->getName()));
+
+        if (in_array($fieldDescription->getMappingType(), array(ClassMetadataInfo::ONE, ClassMetadataInfo::MANY, ClassMetadataInfo::REFERENCE_MANY, ClassMetadataInfo::REFERENCE_ONE ))) {
+            $admin->attachAdminClass($fieldDescription);
+        }
     }
 
     /**
@@ -121,6 +127,16 @@ class DatagridBuilder implements DatagridBuilderInterface
         $admin->addFilterFieldDescription($fieldDescription->getName(), $fieldDescription);
 
         $fieldDescription->mergeOption('field_options', array('required' => false));
+
+        if ($type === 'doctrine_mongo_autocomplete') {
+            $fieldDescription->mergeOption('field_options', array(
+                'class' => $fieldDescription->getTargetEntity(),
+                'model_manager' => $fieldDescription->getAdmin()->getModelManager(),
+                'admin_code' => $admin->getCode(),
+                'context' => 'filter',
+            ));
+        }
+
         $filter = $this->filterFactory->create($fieldDescription->getName(), $type, $fieldDescription->getOptions());
 
         if (false !== $filter->getLabel() && !$filter->getLabel()) {
@@ -139,7 +155,8 @@ class DatagridBuilder implements DatagridBuilderInterface
      */
     public function getBaseDatagrid(AdminInterface $admin, array $values = array())
     {
-        $pager = new Pager;
+        $pager = $this->getPager($admin->getPagerType());
+
         $pager->setCountColumn($admin->getModelManager()->getIdentifierFieldNames($admin->getClass()));
 
         $defaultOptions = array();
@@ -150,5 +167,24 @@ class DatagridBuilder implements DatagridBuilderInterface
         $formBuilder = $this->formFactory->createNamedBuilder('filter', 'form', array(), $defaultOptions);
 
         return new Datagrid($admin->createQuery(), $admin->getList(), $pager, $formBuilder, $values);
+    }
+
+    /**
+     * Get pager by pagerType
+     *
+     * @param string $pagerType
+     *
+     * @return \Sonata\AdminBundle\Datagrid\PagerInterface
+     *
+     * @throws \RuntimeException If invalid pager type is set.
+     */
+    protected function getPager($pagerType)
+    {
+        switch ($pagerType) {
+            case Pager::TYPE_DEFAULT:
+                return new Pager();
+            default:
+                throw new \RuntimeException(sprintf('Unknown pager type "%s".', $pagerType));
+        }
     }
 }
