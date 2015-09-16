@@ -12,31 +12,27 @@
 
 namespace Sonata\DoctrineMongoDBAdminBundle\Filter;
 
-class DateFilter extends AbstractDateFilter
+class DateTimeRangeFilter extends AbstractDateFilter
 {
-
     /**
-     * This filter has no range
+     * This Filter allows filtering by time
      *
      * @var boolean
      */
-    protected $range = false;
+    protected $time = true;
 
     /**
-     * This filter does not allow filtering by time
+     * This is a range filter
      *
      * @var boolean
      */
-    protected $time = false;
+    protected $range = true;
 
     /**
-     * Because we lack a time variable we select a range from the days start to end.
-     *
-     * @author Wesley van Opdorp <wesley.van.opdorp@freshheads.com>
-     * @return mixed|null|string
+     * {@inheritdoc}
      */
     public function getFieldType()
     {
-        return $this->getOption('field_type', 'date');
+        return $this->getOption('field_type', 'sonata_type_datetime_range');
     }
 }
