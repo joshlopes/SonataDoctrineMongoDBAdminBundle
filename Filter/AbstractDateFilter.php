@@ -19,14 +19,16 @@ use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
 abstract class AbstractDateFilter extends Filter
 {
     /**
-     * Flag indicating that filter will have range
-     * @var boolean
+     * Flag indicating that filter will have range.
+     *
+     * @var bool
      */
     protected $range = false;
 
     /**
-     * Flag indicating that filter will filter by datetime instead by date
-     * @var boolean
+     * Flag indicating that filter will filter by datetime instead by date.
+     *
+     * @var bool
      */
     protected $time = false;
 
@@ -88,14 +90,15 @@ abstract class AbstractDateFilter extends Filter
     /**
      * Returns if the filter type requires a value to be set.
      *
-     * @param  integer $type
+     * @param int $type
+     *
      * @return bool
      */
     protected function typeRequiresValue($type)
     {
         return (in_array($type, array(
                     DateType::TYPE_NULL,
-                    DateType::TYPE_NOT_NULL)
+                    DateType::TYPE_NOT_NULL, )
         ));
     }
 
@@ -123,32 +126,31 @@ abstract class AbstractDateFilter extends Filter
         }
 
         return array($name, array(
-                'field_type' => $this->getFieldType(),
+                'field_type'    => $this->getFieldType(),
                 'field_options' => $this->getFieldOptions(),
-                'label' => $this->getLabel(),
+                'label'         => $this->getLabel(),
         ));
     }
 
     /**
-     * Resolves DataType:: constants to MongoDb operators
+     * Resolves DataType:: constants to MongoDb operators.
      *
-     * @param integer $type
+     * @param int $type
      *
      * @return string
      */
     protected function getOperator($type)
     {
         $choices = array(
-            DateType::TYPE_NULL => 'equals',
-            DateType::TYPE_NOT_NULL => 'notEqual',
-            DateType::TYPE_EQUAL => 'equals',
+            DateType::TYPE_NULL          => 'equals',
+            DateType::TYPE_NOT_NULL      => 'notEqual',
+            DateType::TYPE_EQUAL         => 'equals',
             DateType::TYPE_GREATER_EQUAL => 'gte',
-            DateType::TYPE_GREATER_THAN => 'gt',
-            DateType::TYPE_LESS_EQUAL => 'lte',
-            DateType::TYPE_LESS_THAN => 'lt'
+            DateType::TYPE_GREATER_THAN  => 'gt',
+            DateType::TYPE_LESS_EQUAL    => 'lte',
+            DateType::TYPE_LESS_THAN     => 'lt',
         );
 
         return $choices[intval($type)];
     }
-
 }

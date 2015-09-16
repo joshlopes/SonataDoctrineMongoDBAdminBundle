@@ -30,11 +30,12 @@ class DateFilter extends AbstractDateFilter
     protected $time = false;
 
     /**
-     * {@inheritdoc}
+     * Because we lack a time variable we select a range from the days start to end.
+     *
+     * @author Wesley van Opdorp <wesley.van.opdorp@freshheads.com>
      */
     public function getFieldType()
     {
         return $this->getOption('field_type', 'date');
     }
-
 }
